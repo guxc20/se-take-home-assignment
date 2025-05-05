@@ -1,38 +1,105 @@
-## FeedMe Software Engineer Take Home Assignment
-Below is a take home assignment before the interview of the position. You are required to
-1. Understand the situation and use case. You may contact the interviewer for further clarification.
-2. Fork this repo and implement the requirement with your most familiar tools.
-3. Complete the requirement and perform your own testing.
-4. Provide documentation for the any part that you think is needed.
-5. Commit into your own github and share your repo with the interviewer.
-6. Bring the source code and functioning prototype to the interview session.
+# 烹饪机器人设计
+## 功能点
+* 支持“新建普通订单”、“新建VIP订单”
+* 支持“+bot”、“-bot”
+* 机器人一次处理1个订单，10秒完成
+* 优先队列逻辑：VIP > 普通，且新 VIP 在现有 VIP 之后
+* 减少机器人时，正在处理的订单回到待处理队列
+* status 命令查看订单与机器人状态
+* 并发安全
 
-### Situation
-McDonald is transforming their business during COVID-19. They wish to build the automated cooking bots to reduce workforce and increase their efficiency. As one of the software engineer in the project. You task is to create an order controller which handle the order control flow. 
+## 运行
+```azure
+go run .
+```
+或者直接运行编译后的二进制文件
+```azure
+./se-take-home-assignment
+```
+## 测试
+### 可用命令
+- `new normal (nn)` → 新建普通订单
+- `new vip (nv)` → 新建 VIP 订单
+- `+bot (+b)` → 增加机器人
+- `-bot (-b)` → 移除机器人
+- `status (st)` → 查看当前订单和机器人状态
+- `exit (ex)` → 退出程序
 
-### User Story
-As below is part of the user story:
-1. As McDonald's normal customer, after I submitted my order, I wish to see my order flow into "PENDING" area. After the cooking bot process my order, I want to see it flow into to "COMPLETE" area.
-2. As McDonald's VIP member, after I submitted my order, I want my order being process first before all order by normal customer.  However if there's existing order from VIP member, my order should queue behind his/her order.
-3. As McDonald's manager, I want to increase or decrease number of cooking bot available in my restaurant. When I increase a bot, it should immediately process any pending order. When I decrease a bot, the processing order should remain un-process.
-4. As McDonald bot, it can only pickup and process 1 order at a time, each order required 10 seconds to complete process.
+### 执行样例
 
-### Requirements
-1. When "New Normal Order" clicked, a new order should show up "PENDING" Area.
-2. When "New VIP Order" clicked, a new order should show up in "PENDING" Area. It should place in-front of all existing "Normal" order but behind of all existing "VIP" order.
-3. The order number should be unique and increasing.
-4. When "+ Bot" clicked, a bot should be created and start processing the order inside "PENDING" area. after 10 seconds picking up the order, the order should move to "COMPLETE" area. Then the bot should start processing another order if there is any left in "PENDING" area.
-5. If there is no more order in the "PENDING" area, the bot should become IDLE until a new order come in.
-6. When "- Bot" clicked, the newest bot should be destroyed. If the bot is processing an order, it should also stop the process. The order now back to "PENDING" and ready to process by other bot.
-7. No data persistance is needed for this prototype, you may perform all the process inside memory.
+```azure
+=== 麦当劳烹饪机器人系统 ===
+> 指令: new normal (nn) | new vip (nv) | +bot (+b) | -bot (-b) | status (s) | exit (e)
+> +b
+[系统] 添加机器人 1
 
-### Functioning Prototype
-You may demostrate your final funtioning prototype with **one and only one** of the following method:
-- CLI application
-- UI application
-- E2E test case
+> nn
+[系统] 新订单 1 已加入 (VIP: false)
 
-### Tips on completing this task
-- Testing, testing and testing. Make sure the prototype is functioning and meeting all the requirements.
-- Do not over engineering. Try to scope your working hour within 3 hours (1 hour per day). You may document all the optimization or technology concern that you think good to bring in the solution.
-- Complete the implementation as clean as possible, clean code is a strong plus point, do not bring in all the fancy tech stuff.
+> [Robot 1] 开始处理订单 1 (VIP: false)
+
+> nn
+[系统] 新订单 2 已加入 (VIP: false)
+
+> nv
+[系统] 新订单 3 已加入 (VIP: true)
+
+> nn
+[系统] 新订单 4 已加入 (VIP: false)
+
+> status
+====== 当前状态 ======
+> 待处理订单:
+> - 订单 3 (VIP: true)
+> - 订单 2 (VIP: false)
+> - 订单 4 (VIP: false)
+> 已完成订单:
+> 机器人状态:
+> - 机器人 1: 正在处理订单 1
+> ====================
+
+> [Robot 1] 完成订单 1
+
+> [Robot 1] 开始处理订单 3 (VIP: true)
+
+> [Robot 1] 完成订单 3
+
+> [Robot 1] 开始处理订单 2 (VIP: false)
+
+> +b
+[系统] 添加机器人 2
+
+> [Robot 2] 开始处理订单 4 (VIP: false)
+
+> [Robot 1] 完成订单 2
+
+> st
+====== 当前状态 ======
+> 待处理订单:
+> 已完成订单:
+> - 订单 1 (VIP: false)
+> - 订单 3 (VIP: true)
+> - 订单 2 (VIP: false)
+> 机器人状态:
+> - 机器人 1: 空闲
+> - 机器人 2: 正在处理订单 4
+> ====================
+
+> [Robot 2] 完成订单 4
+
+> st
+====== 当前状态 ======
+> 待处理订单:
+> 已完成订单:
+> - 订单 1 (VIP: false)
+> - 订单 3 (VIP: true)
+> - 订单 2 (VIP: false)
+> - 订单 4 (VIP: false)
+> 机器人状态:
+> - 机器人 1: 空闲
+> - 机器人 2: 空闲
+> ====================
+
+> exit
+
+```
