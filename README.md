@@ -10,11 +10,11 @@
 
 ## 运行
 ```azure
-go run .
+./cookrobot
 ```
-或者直接运行编译后的二进制文件
+如果是其他架构的系统，请编译对应版本，比如linux/amd64的编译命令：
 ```azure
-./se-take-home-assignment
+make build GOOS=linux GOARCH=amd64
 ```
 ## 测试
 ### 可用命令
